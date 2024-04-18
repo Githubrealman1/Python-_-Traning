@@ -1,34 +1,50 @@
-name: Windows 11 RDP with Ngrok
-
+name: SSH Remote RDP
+run-name: SSH Remote RDP
+env:
+  # The name of the main module repository
+  main_project_module: workspace
+  
 on:
-  workflow_dispatch:
-
+  schedule:
+    - cron: '0 */2 * * *'  # Schedule the workflow to run every 2 hours
+        
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9, 3.8, 3.7]  # Test with multiple Python versions
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Download Ngrok
-      run: |
-        Invoke-WebRequest -Uri "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip" -OutFile "ngrok-stable-windows-amd64.zip"
-        Expand-Archive ngrok-stable-windows-amd64.zip
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
 
-    - name: Set up Ngrok
-      env:
-        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Install dependencies
       run: |
-        $ngrokPath = "${{ github.workspace }}/ngrok.exe"
-        & $ngrokPath authtoken $env:NGROK_AUTH_TOKEN
-        & $ngrokPath tcp 3389 &
+        pip install -r requirements.txt
+      working-directory: ${{ env.main_project_module }}
 
-    - name: Get Ngrok URL
-      id: ngrok_url
-      run: |
-        echo "::set-output name=url::$(.\ngrok.exe http 3389 --log=stdout | Select-String -Pattern 'tcp://.*?:(\d+)' -AllMatches | ForEach-Object { $_.Matches.Groups[1].Value })"
+    - name: Start SSH via tmate
+      uses: rdp-studio/ssh2actions@main
+      with:
+        duration: '24h'  # Extend the duration to 24 hours
+        keep_alive: 'true'  # Enable keep-alive
+        keep_alive_message: 'Keeping the SSH session alive. Have a great day!'  # Custom keep-alive message
+        # Add any other necessary configurations here
 
-    - name: Print Ngrok URL
+    - name: Perform post-SSH tasks
       run: |
-        echo "RDP URL: ${{ steps.ngrok_url.outputs.url }}"
+        # Add any post-SSH tasks here, such as database migrations, data processing, etc.
+      working-directory: ${{ env.main_project_module }}
+
+    - name: Send notification
+      if: always()
+      run: |
+        echo "SSH Remote RDP workflow completed successfully."
+        # Add notification logic here, such as sending an email or Slack message

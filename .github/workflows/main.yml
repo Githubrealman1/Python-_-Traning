@@ -20,8 +20,9 @@ jobs:
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
       run: |
-        .\ngrok authtoken $env:NGROK_AUTH_TOKEN
-        .\ngrok tcp 3389 &
+        $ngrokPath = "${{ github.workspace }}/ngrok"
+        & $ngrokPath authtoken $env:NGROK_AUTH_TOKEN
+        & $ngrokPath tcp 3389 &
 
     - name: Get Ngrok URL
       id: ngrok_url

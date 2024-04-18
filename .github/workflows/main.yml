@@ -7,6 +7,7 @@ env:
 on:
   schedule:
     - cron: '0 */2 * * *'  # Schedule the workflow to run every 2 hours
+  workflow_dispatch:  # Add workflow dispatch event for manual triggering
         
 jobs:
   build:

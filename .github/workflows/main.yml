@@ -28,6 +28,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Download dependencies
+      run: |
+        cd ${{ env.main_project_module }}  # Change directory to the main project module
+        wget https://example.com/requirements.txt -O requirements.txt  # Download requirements.txt from a specified source
+      shell: bash
+
     - name: Install dependencies
       run: |
         cd ${{ env.main_project_module }}  # Change directory to the main project module

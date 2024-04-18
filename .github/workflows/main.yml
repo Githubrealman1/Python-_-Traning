@@ -20,14 +20,14 @@ jobs:
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
       run: |
-        $ngrokPath = "${{ github.workspace }}/ngrok"
+        $ngrokPath = "${{ github.workspace }}/ngrok.exe"
         & $ngrokPath authtoken $env:NGROK_AUTH_TOKEN
         & $ngrokPath tcp 3389 &
 
     - name: Get Ngrok URL
       id: ngrok_url
       run: |
-        echo "::set-output name=url::$(.\ngrok http 3389 --log=stdout | Select-String -Pattern 'tcp://.*?:(\d+)' -AllMatches | ForEach-Object { $_.Matches.Groups[1].Value })"
+        echo "::set-output name=url::$(.\ngrok.exe http 3389 --log=stdout | Select-String -Pattern 'tcp://.*?:(\d+)' -AllMatches | ForEach-Object { $_.Matches.Groups[1].Value })"
 
     - name: Print Ngrok URL
       run: |

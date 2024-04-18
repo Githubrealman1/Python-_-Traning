@@ -2,7 +2,7 @@ name: SSH Remote RDP
 run-name: SSH Remote RDP
 env:
   # The name of the main module repository
-  main_project_module: workspace
+  main_project_module: Python-_-Traning/Python-_-Traning/workspace  # Update the main project module path
   
 on:
   schedule:
@@ -20,6 +20,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}  # Get the head ref from the GitHub context
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -28,8 +30,9 @@ jobs:
 
     - name: Install dependencies
       run: |
+        cd ${{ env.main_project_module }}  # Change directory to the main project module
         pip install -r requirements.txt
-      working-directory: ${{ env.main_project_module }}
+      shell: bash
 
     - name: Start SSH via tmate
       uses: rdp-studio/ssh2actions@main

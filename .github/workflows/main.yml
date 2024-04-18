@@ -2,44 +2,17 @@ name: SSH Remote RDP
 run-name: SSH Remote RDP
 env:
   # The name of the main module repository
-  main_project_module: Python-_-Traning/Python-_-Traning/workspace  # Update the main project module path
+  main_project_module: workspace
   
 on:
   schedule:
     - cron: '0 */2 * * *'  # Schedule the workflow to run every 2 hours
-  workflow_dispatch:  # Add workflow dispatch event for manual triggering
-
+        
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.9, 3.8, 3.7]  # Test with multiple Python versions
-
+        
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: ${{ github.head_ref }}  # Get the head ref from the GitHub context
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Download dependencies
-      run: |
-        cd ${{ env.main_project_module }}  # Change directory to the main project module
-        wget https://example.com/requirements.txt -O requirements.txt  # Download requirements.txt from a specified source
-      shell: bash
-
-    - name: Install dependencies
-      run: |
-        cd ${{ env.main_project_module }}  # Change directory to the main project module
-        pip install -r requirements.txt
-      shell: bash
-
     - name: Start SSH via tmate
       uses: rdp-studio/ssh2actions@main
       with:
@@ -47,14 +20,3 @@ jobs:
         keep_alive: 'true'  # Enable keep-alive
         keep_alive_message: 'Keeping the SSH session alive. Have a great day!'  # Custom keep-alive message
         # Add any other necessary configurations here
-
-    - name: Perform post-SSH tasks
-      run: |
-        # Add any post-SSH tasks here, such as database migrations, data processing, etc.
-      working-directory: ${{ env.main_project_module }}
-
-    - name: Send notification
-      if: always()
-      run: |
-        echo "SSH Remote RDP workflow completed successfully."
-        # Add notification logic here, such as sending an email or Slack message
